@@ -1,0 +1,5 @@
+Pull|git pull
+Push|git push
+Status|git status
+Add All|git add .
+Commit|git commit -m ""
