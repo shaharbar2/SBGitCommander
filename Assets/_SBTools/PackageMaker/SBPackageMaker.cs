@@ -214,8 +214,7 @@ SOFTWARE.";
 ## Installation
 
 To install this package, add the following line to the `dependencies` section of your project's `manifest.json` file:
-
-""{_packageName}"": ""git+https://github.com/shaharbar2/.git?path=/Packages/{_packageName}";
+""{_packageName}"": ""https://github.com/shaharbar2/SBTools.git?path=/Packages/{_packageName}#main""";
                 
                 File.WriteAllText(Path.Combine(_packageFolderPath, "README.md"), readmeText);
         }
