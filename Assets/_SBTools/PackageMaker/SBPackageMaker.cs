@@ -43,8 +43,8 @@ namespace Shahar.Bar.Utils
             _packageDisplayName = TextFieldWithPlaceholder("Display Name:", _packageDisplayName, "My Package");
             _packageDescription = TextFieldWithPlaceholder("Description:", _packageDescription, "Description of what the package does.");
             _packageVersion = TextFieldWithPlaceholder("Version:", _packageVersion, "1.0.0");
-            _licenseEntity = TextFieldWithPlaceholder("License Entity:", _licenseEntity, "Shahar Bar (SBTools)"); 
-            
+            _licenseEntity = TextFieldWithPlaceholder("License Entity:", _licenseEntity, "Shahar Bar (SBTools)");
+
             if (GUILayout.Button("Create Package"))
             {
                 CreateUPMPackage();
@@ -72,11 +72,6 @@ namespace Shahar.Bar.Utils
             if (!Directory.Exists(_sourceFolderPath))
             {
                 Debug.LogError("Source folder does not exist.");
-                return;
-            }
-
-            if (Directory.Exists(_packageFolderPath))
-            {
                 return;
             }
 
@@ -111,15 +106,30 @@ namespace Shahar.Bar.Utils
             CopyFilesToSubfolder(testScripts, "Tests");
             CopyFilesToSubfolder(runtimeScripts, "Runtime");
 
-            string packageJson = GeneratePackageJson();
-            File.WriteAllText(Path.Combine(_packageFolderPath, "package.json"), packageJson);
+            if (ShouldGenerateFile("package.json"))
+            {
+                string packageJson = GeneratePackageJson();
+                File.WriteAllText(Path.Combine(_packageFolderPath, "package.json"), packageJson);
+            }
 
-            CreateLicenseFile();
-            CreateReadmeFile();
+            if (ShouldGenerateFile("LICENSE.md"))
+            {
+                CreateLicenseFile();
+            }
+
+            if (ShouldGenerateFile("README.md"))
+            {
+                CreateReadmeFile();
+            }
 
             AssetDatabase.Refresh();
-
             Debug.Log("Package created successfully.");
+        }
+
+        private bool ShouldGenerateFile(string fileName)
+        {
+            var filePath = Path.Combine(_packageFolderPath, fileName);
+            return !File.Exists(filePath) || EditorUtility.DisplayDialog("File Exists", $"The file {fileName} already exists. Do you want to overwrite it?", "Yes", "No");
         }
 
         private void CopyFilesToSubfolder(List<(string, string)> files, string subfolderName)
@@ -129,12 +139,19 @@ namespace Shahar.Bar.Utils
             var subfolderPath = Path.Combine(_packageFolderPath, subfolderName);
             Directory.CreateDirectory(subfolderPath);
 
-            // Call to create the asmdef for the subfolder
             CreateSubfolderAndAsmdef(subfolderName, _packageName);
 
             foreach (var file in files)
             {
                 var destinationFilePath = Path.Combine(subfolderPath, Path.GetFileName(file.Item1));
+                if (File.Exists(destinationFilePath))
+                {
+                    if (!EditorUtility.DisplayDialog("File Exists", $"The file {Path.GetFileName(destinationFilePath)} already exists. Do you want to overwrite it?", "Yes", "No"))
+                    {
+                        continue;
+                    }
+                }
+
                 File.Copy(file.Item2, destinationFilePath, true);
             }
         }
@@ -221,8 +238,8 @@ SOFTWARE.";
 
 To install this package, add the following line to the `dependencies` section of your project's `manifest.json` file:
 ""{_packageName}"": ""https://github.com/shaharbar2/SBTools.git?path=/Packages/{_packageName}#main""";
-                
-                File.WriteAllText(Path.Combine(_packageFolderPath, "README.md"), readmeText);
+
+            File.WriteAllText(Path.Combine(_packageFolderPath, "README.md"), readmeText);
         }
     }
 }
