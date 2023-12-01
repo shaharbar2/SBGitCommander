@@ -1,4 +1,4 @@
-![C# Version](https://img.shields.io/badge/C%23-8.0-blue.svg)
+![C# Version](https://img.shields.io/badge/C%23-8.0-blue.s vg)
 ![Unity Version](https://img.shields.io/badge/Unity-2020.1+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Open Source](https://img.shields.io/badge/Open%20Source-%E2%9C%93-brightgreen.svg)
@@ -11,11 +11,11 @@
 
 # SB Git Commander
 
+![img.png](Packages%2Fcom.sb.git-commander%2Fimg.png)
+
+![img_1.png](Packages%2Fcom.sb.git-commander%2Fimg_1.png)
+
 Tool for invoking git commands from editor
-
-![img.png](img.png)
-
-![img_1.png](img_1.png)
 
 ## Installation
 
@@ -55,4 +55,5 @@ Feel free to fork and create Pull Requests.
 ## License
 
 `SBGitCommander` is distributed under the MIT License.
-For more details about the license, see the included [LICENSE.md](LICENSE.md) file.
+For more details about the license, see the included 
+[LICENSE.md](Packages%2Fcom.sb.git-commander%2FLICENSE.md) file.
