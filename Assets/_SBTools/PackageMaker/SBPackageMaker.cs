@@ -215,7 +215,7 @@ SOFTWARE.";
 
 To install this package, add the following line to the `dependencies` section of your project's `manifest.json` file:
 
-""{_packageName}"": ""git+https://github.com/[YourGitHubUsernameOrOrganization]/{_packageName}.git#v{_packageVersion}""";
+""{_packageName}"": ""git+https://github.com/shaharbar2/.git?path=/Packages/{_packageName}";
                 
                 File.WriteAllText(Path.Combine(_packageFolderPath, "README.md"), readmeText);
         }
