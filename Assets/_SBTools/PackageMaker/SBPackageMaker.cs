@@ -85,7 +85,7 @@ namespace Shahar.Bar.Utils
             {
                 var fileContent = File.ReadAllText(filePath);
 
-                var relativePath = filePath.Substring(_sourceFolderPath.Length + 1);
+                var relativePath = filePath[(_sourceFolderPath.Length + 1)..];
                 var targetPath = Path.Combine(_packageFolderPath, relativePath);
 
                 if (fileContent.Contains("Editor"))
@@ -108,7 +108,7 @@ namespace Shahar.Bar.Utils
 
             if (ShouldGenerateFile("package.json"))
             {
-                string packageJson = GeneratePackageJson();
+                var packageJson = GeneratePackageJson();
                 File.WriteAllText(Path.Combine(_packageFolderPath, "package.json"), packageJson);
             }
 
@@ -192,18 +192,9 @@ namespace Shahar.Bar.Utils
   ""dependencies"": {{}}
 }}";
 
-        private static void CopyFiles(string sourcePath, string destinationPath)
-        {
-            foreach (var dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
-                Directory.CreateDirectory(dirPath.Replace(sourcePath, destinationPath));
-
-            foreach (var newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
-                File.Copy(newPath, newPath.Replace(sourcePath, destinationPath), true);
-        }
-
         private void CreateLicenseFile()
         {
-            string licenseText = $@"MIT License
+            var licenseText = $@"MIT License
 
 Copyright (c) {DateTime.Now.Year} Shahar Bar {_licenseEntity}
 
@@ -230,7 +221,7 @@ SOFTWARE.";
 
         private void CreateReadmeFile()
         {
-            string readmeText = $@"# {_packageDisplayName}
+            var readmeText = $@"# {_packageDisplayName}
 
 {_packageDescription}
 
