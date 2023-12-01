@@ -10,29 +10,38 @@ namespace Shahar.Bar.Utils
 {
     public class SBGitCommander : EditorWindow
     {
-        private Dictionary<string, string> _gitCommands = new();
-        private string _selectedCommandKey;
+        private static Dictionary<string, string> _gitCommands = new();
+        private static string _selectedCommandKey;
         private int _selectedCommandIndex = -1;
         private string _commandOutput = string.Empty;
         private Vector2 _scrollPosition;
 
-        private readonly string _fullPath = Path.Combine(Application.dataPath, "..", "SBTools", "GitCommands.txt");
+        private static readonly string _fullPath = Path.Combine(Application.dataPath, "..", "SBTools", "GitCommands.txt");
 
-        private string _newCommand;
-        private string _newCommandNickname;
+        private static string _newCommand;
+        private static string _newCommandNickname;
 
         [MenuItem("SBTools/Git Commander")]
         private static void Init()
         {
             var window = (SBGitCommander)GetWindow(typeof(SBGitCommander));
             window.titleContent = new GUIContent("Git Commander");
-            window.EnsureDirectoryAndFileExist();
-            window.LoadCommands();
-            window.RefreshInfo();
+            
+            OnScriptsReloaded();
             window.Show();
         }
-
-        private void EnsureDirectoryAndFileExist()
+        
+        [InitializeOnLoadMethod]
+        private static void OnScriptsReloaded()
+        {
+            EnsureDirectoryAndFileExist();
+            LoadCommands();
+            
+            _selectedCommandKey = _gitCommands.Keys.FirstOrDefault();
+            RefreshInfo();
+        }
+        
+        private static void EnsureDirectoryAndFileExist()
         {
             var directoryInfo = new DirectoryInfo(_fullPath).Parent;
 
@@ -46,7 +55,7 @@ namespace Shahar.Bar.Utils
         }
 
 
-        private void AddDefaultCommands()
+        private static void AddDefaultCommands()
         {
             AddCommand("Pull", "git pull");
             AddCommand("Push", "git push");
@@ -161,7 +170,7 @@ namespace Shahar.Bar.Utils
             RefreshInfo();
         }
 
-        private void RefreshInfo()
+        private static void RefreshInfo()
         {
             _newCommand = _gitCommands[_selectedCommandKey];
             _newCommandNickname = _selectedCommandKey;
@@ -197,7 +206,7 @@ namespace Shahar.Bar.Utils
         }
 
 
-        private void AddCommand(string nickname, string command)
+        private static void AddCommand(string nickname, string command)
         {
             if (!string.IsNullOrWhiteSpace(command) && !string.IsNullOrWhiteSpace(nickname) && !_gitCommands.ContainsKey(nickname))
             {
@@ -206,7 +215,7 @@ namespace Shahar.Bar.Utils
             }
         }
 
-        private void SaveCommands()
+        private static void SaveCommands()
         {
             var folderPath = Path.Combine(Application.dataPath, "SBTools");
             Directory.CreateDirectory(folderPath);
@@ -215,7 +224,7 @@ namespace Shahar.Bar.Utils
             File.WriteAllLines(_fullPath, lines);
         }
 
-        private void LoadCommands()
+        private static void LoadCommands()
         {
             if (!File.Exists(_fullPath)) return;
 
