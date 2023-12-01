@@ -146,11 +146,12 @@ namespace Shahar.Bar.Utils
                 }
             };
 
-            if (_gitCommands.Count > 0 && GUILayout.Button("Delete", deleteStyle, GUILayout.Width(100)))
-            {
-                _gitCommands.Remove(_selectedCommandKey);
-                _selectedCommandKey = _gitCommands.Keys.FirstOrDefault();
-            }
+            if (_gitCommands.Count <= 0 || 
+                !GUILayout.Button("Delete", deleteStyle, GUILayout.Width(100)) || 
+                !EditorUtility.DisplayDialog("Delete Command", $"Are you sure you want to delete {_selectedCommandKey}?", "Yes", "No")) return;
+            
+            _gitCommands.Remove(_selectedCommandKey);
+            _selectedCommandKey = _gitCommands.Keys.FirstOrDefault();
         }
 
         private void DisplayDropDownCommands()

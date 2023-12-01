@@ -1,0 +1,223 @@
+using System;
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
+using System.IO;
+
+namespace Shahar.Bar.Utils
+{
+    public class SBPackageMaker : EditorWindow
+    {
+        private string _sourceFolderPath;
+        private string _packageFolderPath;
+        private string _packageName;
+        private string _packageVersion = "1.0.0";
+        private string _packageDisplayName;
+        private string _packageDescription;
+
+        [MenuItem("SBTools/UPM Package Creator")]
+        private static void Init()
+        {
+            var window = (SBPackageMaker)GetWindow(typeof(SBPackageMaker));
+            window.titleContent = new GUIContent("UPM Package Creator");
+            window.Show();
+        }
+
+        private void OnGUI()
+        {
+            GUILayout.Label("Source Folder", EditorStyles.boldLabel);
+
+            if (GUILayout.Button("Select Source Folder", GUILayout.Width(200)))
+            {
+                _sourceFolderPath = EditorUtility.OpenFolderPanel("Select Source Folder", "", "");
+            }
+
+            if (!string.IsNullOrEmpty(_sourceFolderPath))
+            {
+                EditorGUILayout.TextField("Selected Path:", _sourceFolderPath);
+            }
+
+            GUILayout.Label("Package Settings", EditorStyles.boldLabel);
+            _packageName = TextFieldWithPlaceholder("Name:", _packageName, "com.example.mypackage");
+            _packageDisplayName = TextFieldWithPlaceholder("Display Name:", _packageDisplayName, "My Package");
+            _packageDescription = TextFieldWithPlaceholder("Description:", _packageDescription, "Description of what the package does.");
+            _packageVersion = TextFieldWithPlaceholder("Version:", _packageVersion, "1.0.0");
+
+            if (GUILayout.Button("Create Package"))
+            {
+                CreateUPMPackage();
+            }
+        }
+
+
+        private string TextFieldWithPlaceholder(string label, string value, string placeholder)
+        {
+            EditorGUI.BeginChangeCheck();
+            var newValue = EditorGUILayout.TextField(label, string.IsNullOrEmpty(value) ? placeholder : value);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                return newValue != placeholder ? newValue : "";
+            }
+
+            return value;
+        }
+
+        private void CreateUPMPackage()
+        {
+            _packageFolderPath = Path.Combine(Application.dataPath, "..", "Packages", _packageDisplayName);
+
+            if (!Directory.Exists(_sourceFolderPath))
+            {
+                Debug.LogError("Source folder does not exist.");
+                return;
+            }
+
+            if (Directory.Exists(_packageFolderPath))
+            {
+                Directory.Delete(_packageFolderPath, true);
+            }
+
+            Directory.CreateDirectory(_packageFolderPath);
+
+            var editorScripts = new List<string>();
+            var testScripts = new List<string>();
+            var runtimeScripts = new List<string>();
+
+            foreach (var filePath in Directory.GetFiles(_sourceFolderPath, "*.cs", SearchOption.AllDirectories))
+            {
+                var fileContent = File.ReadAllText(filePath);
+                var fileName = Path.GetFileName(filePath);
+
+                if (fileContent.Contains("Editor"))
+                {
+                    editorScripts.Add(fileName);
+                }
+                else if (fileContent.Contains("Tests"))
+                {
+                    testScripts.Add(fileName);
+                }
+                else
+                {
+                    runtimeScripts.Add(fileName);
+                }
+            }
+
+            CopyFilesToSubfolder(editorScripts, "Editor");
+            CopyFilesToSubfolder(testScripts, "Tests");
+            CopyFilesToSubfolder(runtimeScripts, "Runtime");
+
+            string packageJson = GeneratePackageJson();
+            File.WriteAllText(Path.Combine(_packageFolderPath, "package.json"), packageJson);
+
+            CreateLicenseFile();
+            CreateReadmeFile();
+
+            AssetDatabase.Refresh();
+
+            Debug.Log("Package created successfully.");
+        }
+
+        private void CopyFilesToSubfolder(List<string> files, string subfolderName)
+        {
+            if (files.Count == 0) return;
+
+            var subfolderPath = Path.Combine(_packageFolderPath, subfolderName);
+            Directory.CreateDirectory(subfolderPath);
+            CreateSubfolderAndAsmdef(subfolderName, _packageName);
+
+            foreach (var file in files)
+            {
+                var sourceFilePath = Path.Combine(_sourceFolderPath, file);
+                var destinationFilePath = Path.Combine(subfolderPath, file);
+                File.Copy(sourceFilePath, destinationFilePath, true);
+            }
+        }
+
+        private void CreateSubfolderAndAsmdef(string folderName, string packageName)
+        {
+            var folderPath = Path.Combine(_packageFolderPath, folderName);
+            Directory.CreateDirectory(folderPath);
+
+            var asmdefContent = GenerateAsmdefContent(packageName, folderName);
+            File.WriteAllText(Path.Combine(folderPath, $"{packageName}.{folderName}.asmdef"), asmdefContent);
+        }
+
+        private string GenerateAsmdefContent(string packageName, string folderName)
+        {
+            return $@"{{
+  ""name"": ""{packageName}.{folderName}"",
+  ""references"": [],
+  ""includePlatforms"": [],
+  ""excludePlatforms"": [],
+  ""allowUnsafeCode"": false,
+  ""overrideReferences"": false,
+  ""precompiledReferences"": [],
+  ""autoReferenced"": true,
+  ""defineConstraints"": [],
+  ""versionDefines"": []
+}}";
+        }
+
+        private string GeneratePackageJson() =>
+            $@"{{
+  ""name"": ""{_packageName}"",
+  ""version"": ""{_packageVersion}"",
+  ""displayName"": ""{_packageDisplayName}"",
+  ""description"": ""{_packageDescription}"",
+  ""unity"": ""2020.1"",
+  ""dependencies"": {{}}
+}}";
+
+        private static void CopyFiles(string sourcePath, string destinationPath)
+        {
+            foreach (var dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+                Directory.CreateDirectory(dirPath.Replace(sourcePath, destinationPath));
+
+            foreach (var newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+                File.Copy(newPath, newPath.Replace(sourcePath, destinationPath), true);
+        }
+
+        private void CreateLicenseFile()
+        {
+            string licenseText = $@"MIT License
+
+Copyright (c) {DateTime.Now.Year} Shahar Bar (SBTools)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the ""Software""), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.";
+
+            File.WriteAllText(Path.Combine(_packageFolderPath, "LICENSE.md"), licenseText);
+        }
+
+        private void CreateReadmeFile()
+        {
+            string readmeText = $@"# {_packageDisplayName}
+
+{_packageDescription}
+
+## Installation
+
+To install this package, add the following line to the `dependencies` section of your project's `manifest.json` file:
+
+""{_packageName}"": ""git+https://github.com/[YourGitHubUsernameOrOrganization]/{_packageName}.git#v{_packageVersion}""";
+                
+                File.WriteAllText(Path.Combine(_packageFolderPath, "README.md"), readmeText);
+        }
+    }
+}
