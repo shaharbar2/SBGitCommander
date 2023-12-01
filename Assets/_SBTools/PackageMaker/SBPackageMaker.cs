@@ -16,6 +16,8 @@ namespace Shahar.Bar.Utils
         private string _packageDescription;
         private string _licenseEntity;
 
+        private string _lastCheckedPackageName = "";
+
         [MenuItem("SBTools/UPM Package Creator")]
         private static void Init()
         {
@@ -39,7 +41,19 @@ namespace Shahar.Bar.Utils
             }
 
             GUILayout.Label("Package Settings", EditorStyles.boldLabel);
-            _packageName = TextFieldWithPlaceholder("Name:", _packageName, "com.example.mypackage");
+
+            EditorGUI.BeginChangeCheck();
+            _packageName = EditorGUILayout.TextField("Name:", _packageName);
+            if (EditorGUI.EndChangeCheck())
+            {
+                // Check if the package name has changed and is not empty
+                if (!string.IsNullOrEmpty(_packageName) && _packageName != _lastCheckedPackageName)
+                {
+                    LoadPackageDataIfExists(_packageName);
+                    _lastCheckedPackageName = _packageName;
+                }
+            }
+            
             _packageDisplayName = TextFieldWithPlaceholder("Display Name:", _packageDisplayName, "My Package");
             _packageDescription = TextFieldWithPlaceholder("Description:", _packageDescription, "Description of what the package does.");
             _packageVersion = TextFieldWithPlaceholder("Version:", _packageVersion, "1.0.0");
@@ -51,7 +65,36 @@ namespace Shahar.Bar.Utils
             }
         }
 
+        private void LoadPackageDataIfExists(string packageName)
+        {
+            var packagePath = Path.Combine(Application.dataPath, "..", "Packages", packageName);
+            var packageJsonPath = Path.Combine(packagePath, "package.json");
 
+            if (!File.Exists(packageJsonPath)) return;
+            
+            var packageJson = File.ReadAllText(packageJsonPath);
+            ParsePackageJson(packageJson);
+        }
+
+        private void ParsePackageJson(string json)
+        {
+            PackageJson packageData = JsonUtility.FromJson<PackageJson>(json);
+    
+            if (packageData != null)
+            {
+                _packageName = packageData.name;
+                _packageVersion = packageData.version;
+                _packageDisplayName = packageData.displayName;
+                _packageDescription = packageData.description;
+
+                // Update any other fields if necessary
+            }
+            else
+            {
+                Debug.LogError("Failed to parse package.json");
+            }
+        }
+        
         private string TextFieldWithPlaceholder(string label, string value, string placeholder)
         {
             EditorGUI.BeginChangeCheck();
@@ -232,5 +275,14 @@ To install this package, add the following line to the `dependencies` section of
 
             File.WriteAllText(Path.Combine(_packageFolderPath, "README.md"), readmeText);
         }
+    }
+    
+    [Serializable]
+    public class PackageJson
+    {
+        public string name;
+        public string version;
+        public string displayName;
+        public string description;
     }
 }
