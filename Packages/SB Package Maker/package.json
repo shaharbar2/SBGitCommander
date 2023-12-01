@@ -1,0 +1,8 @@
+{
+  "name": "com.sb.package_maker",
+  "version": "0.0.1",
+  "displayName": "SB Package Maker",
+  "description": "Will be used to create packages",
+  "unity": "2020.1",
+  "dependencies": {}
+}
