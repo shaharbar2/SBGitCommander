@@ -14,6 +14,7 @@ namespace Shahar.Bar.Utils
         private string _packageVersion = "1.0.0";
         private string _packageDisplayName;
         private string _packageDescription;
+        private string _licenseEntity;
 
         [MenuItem("SBTools/UPM Package Creator")]
         private static void Init()
@@ -42,7 +43,8 @@ namespace Shahar.Bar.Utils
             _packageDisplayName = TextFieldWithPlaceholder("Display Name:", _packageDisplayName, "My Package");
             _packageDescription = TextFieldWithPlaceholder("Description:", _packageDescription, "Description of what the package does.");
             _packageVersion = TextFieldWithPlaceholder("Version:", _packageVersion, "1.0.0");
-
+            _licenseEntity = TextFieldWithPlaceholder("License Entity:", _licenseEntity, "Shahar Bar (SBTools)"); 
+            
             if (GUILayout.Button("Create Package"))
             {
                 CreateUPMPackage();
@@ -75,31 +77,33 @@ namespace Shahar.Bar.Utils
 
             if (Directory.Exists(_packageFolderPath))
             {
-                Directory.Delete(_packageFolderPath, true);
+                return;
             }
 
             Directory.CreateDirectory(_packageFolderPath);
 
-            var editorScripts = new List<string>();
-            var testScripts = new List<string>();
-            var runtimeScripts = new List<string>();
+            var editorScripts = new List<(string, string)>();
+            var testScripts = new List<(string, string)>();
+            var runtimeScripts = new List<(string, string)>();
 
             foreach (var filePath in Directory.GetFiles(_sourceFolderPath, "*.cs", SearchOption.AllDirectories))
             {
                 var fileContent = File.ReadAllText(filePath);
-                var fileName = Path.GetFileName(filePath);
+
+                var relativePath = filePath.Substring(_sourceFolderPath.Length + 1);
+                var targetPath = Path.Combine(_packageFolderPath, relativePath);
 
                 if (fileContent.Contains("Editor"))
                 {
-                    editorScripts.Add(fileName);
+                    editorScripts.Add((targetPath, filePath));
                 }
                 else if (fileContent.Contains("Tests"))
                 {
-                    testScripts.Add(fileName);
+                    testScripts.Add((targetPath, filePath));
                 }
                 else
                 {
-                    runtimeScripts.Add(fileName);
+                    runtimeScripts.Add((targetPath, filePath));
                 }
             }
 
@@ -118,19 +122,20 @@ namespace Shahar.Bar.Utils
             Debug.Log("Package created successfully.");
         }
 
-        private void CopyFilesToSubfolder(List<string> files, string subfolderName)
+        private void CopyFilesToSubfolder(List<(string, string)> files, string subfolderName)
         {
             if (files.Count == 0) return;
 
             var subfolderPath = Path.Combine(_packageFolderPath, subfolderName);
             Directory.CreateDirectory(subfolderPath);
+
+            // Call to create the asmdef for the subfolder
             CreateSubfolderAndAsmdef(subfolderName, _packageName);
 
             foreach (var file in files)
             {
-                var sourceFilePath = Path.Combine(_sourceFolderPath, file);
-                var destinationFilePath = Path.Combine(subfolderPath, file);
-                File.Copy(sourceFilePath, destinationFilePath, true);
+                var destinationFilePath = Path.Combine(subfolderPath, Path.GetFileName(file.Item1));
+                File.Copy(file.Item2, destinationFilePath, true);
             }
         }
 
@@ -183,7 +188,7 @@ namespace Shahar.Bar.Utils
         {
             string licenseText = $@"MIT License
 
-Copyright (c) {DateTime.Now.Year} Shahar Bar (SBTools)
+Copyright (c) {DateTime.Now.Year} Shahar Bar {_licenseEntity}
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the ""Software""), to deal
