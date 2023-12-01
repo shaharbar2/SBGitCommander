@@ -1,3 +1,14 @@
+![C# Version](https://img.shields.io/badge/C%23-8.0-blue.svg)
+![Unity Version](https://img.shields.io/badge/Unity-2020.1+-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Open Source](https://img.shields.io/badge/Open%20Source-%E2%9C%93-brightgreen.svg)
+![Last Updated](https://img.shields.io/badge/last%20updated-2023--12--01-lightgrey.svg)
+![Platform](https://img.shields.io/badge/platform-Unity%20Editor-lightgrey.svg)
+![GitHub repo size](https://img.shields.io/github/repo-size/shaharbar2/SBTools)
+![GitHub Repo stars](https://img.shields.io/github/stars/shaharbar2/SBTools?style=social)
+![GitHub forks](https://img.shields.io/github/forks/shaharbar2/SBTools?style=social)
+
+
 # SB Package Maker
 
 Will be used to create upm packages
