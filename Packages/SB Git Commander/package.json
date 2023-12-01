@@ -1,0 +1,8 @@
+{
+  "name": "com.sb.git_commander",
+  "version": "0.0.1",
+  "displayName": "SB Git Commander",
+  "description": "Will be used to invoke git commands from the unity editor",
+  "unity": "2020.1",
+  "dependencies": {}
+}
