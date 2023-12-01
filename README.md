@@ -1,4 +1,4 @@
-![C# Version](https://img.shields.io/badge/C%23-8.0-blue.s vg)
+![C# Version](https://img.shields.io/badge/C%23-8.0-blue.svg)
 ![Unity Version](https://img.shields.io/badge/Unity-2020.1+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Open Source](https://img.shields.io/badge/Open%20Source-%E2%9C%93-brightgreen.svg)
