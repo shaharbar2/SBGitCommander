@@ -65,7 +65,7 @@ namespace Shahar.Bar.Utils
 
         private void CreateUPMPackage()
         {
-            _packageFolderPath = Path.Combine(Application.dataPath, "..", "Packages", _packageDisplayName);
+            _packageFolderPath = Path.Combine(Application.dataPath, "..", "Packages", _packageName);
 
             if (!Directory.Exists(_sourceFolderPath))
             {
@@ -139,16 +139,17 @@ namespace Shahar.Bar.Utils
             var folderPath = Path.Combine(_packageFolderPath, folderName);
             Directory.CreateDirectory(folderPath);
 
-            var asmdefContent = GenerateAsmdefContent(packageName, folderName);
+            var asmdefContent = GenerateAsmdefContent(packageName, folderName, folderName == "Editor");
             File.WriteAllText(Path.Combine(folderPath, $"{packageName}.{folderName}.asmdef"), asmdefContent);
         }
 
-        private string GenerateAsmdefContent(string packageName, string folderName)
+        private string GenerateAsmdefContent(string packageName, string folderName, bool onlyEditor)
         {
+            var includeEditor = onlyEditor ? @"""Editor""" : "";
             return $@"{{
   ""name"": ""{packageName}.{folderName}"",
   ""references"": [],
-  ""includePlatforms"": [],
+  ""includePlatforms"": [{includeEditor}],
   ""excludePlatforms"": [],
   ""allowUnsafeCode"": false,
   ""overrideReferences"": false,
@@ -214,8 +215,7 @@ SOFTWARE.";
 ## Installation
 
 To install this package, add the following line to the `dependencies` section of your project's `manifest.json` file:
-
-""{_packageName}"": ""git+https://github.com/shaharbar2/.git?path=/Packages/{_packageName}";
+""{_packageName}"": ""https://github.com/shaharbar2/SBTools.git?path=/Packages/{_packageName}#main""";
                 
                 File.WriteAllText(Path.Combine(_packageFolderPath, "README.md"), readmeText);
         }

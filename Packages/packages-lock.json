@@ -1,13 +1,13 @@
 {
   "dependencies": {
-    "com.sb.git_commander": {
-      "version": "file:SB Git Commander",
+    "com.sb.git-commander": {
+      "version": "file:com.sb.git-commander",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
     },
-    "com.sb.package_maker": {
-      "version": "file:SB Package Maker",
+    "com.sb.package-maker": {
+      "version": "file:com.sb.package-maker",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

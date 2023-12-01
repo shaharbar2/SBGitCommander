@@ -1,7 +1,7 @@
 {
-  "name": "com.sb.git_commander.Editor",
+  "name": "com.sb.git-commander.Editor",
   "references": [],
-  "includePlatforms": [],
+  "includePlatforms": ["Editor"],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
   "overrideReferences": false,
