@@ -81,7 +81,7 @@ namespace Shahar.Bar.Utils
             var testScripts = new List<(string, string)>();
             var runtimeScripts = new List<(string, string)>();
 
-            foreach (var filePath in Directory.GetFiles(_sourceFolderPath, "*.cs", SearchOption.AllDirectories))
+            foreach (var filePath in Directory.GetFiles(_sourceFolderPath, "*.*", SearchOption.AllDirectories))
             {
                 var fileContent = File.ReadAllText(filePath);
 
