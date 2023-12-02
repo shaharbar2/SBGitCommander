@@ -86,8 +86,6 @@ namespace Shahar.Bar.Utils
                 _packageVersion = packageData.version;
                 _packageDisplayName = packageData.displayName;
                 _packageDescription = packageData.description;
-
-                // Update any other fields if necessary
             }
             else
             {
@@ -148,6 +146,13 @@ namespace Shahar.Bar.Utils
             CopyFilesToSubfolder(editorScripts, "Editor");
             CopyFilesToSubfolder(testScripts, "Tests");
             CopyFilesToSubfolder(runtimeScripts, "Runtime");
+
+            if (string.IsNullOrEmpty(_packageVersion))
+            {
+                var parts = _packageVersion.Split('.');
+                parts[^1] = (int.Parse(parts[^1]) + 1).ToString();
+                _packageVersion = string.Join(".", parts);
+            }
 
             if (ShouldGenerateFile("package.json"))
             {
@@ -212,7 +217,7 @@ namespace Shahar.Bar.Utils
         {
             var includeEditor = onlyEditor ? @"""Editor""" : "";
             return $@"{{
-  ""name"": ""{packageName}.{folderName}"",
+  ""name"": ""{packageName.Replace(".com", "")}.{folderName}"",
   ""references"": [],
   ""includePlatforms"": [{includeEditor}],
   ""excludePlatforms"": [],
