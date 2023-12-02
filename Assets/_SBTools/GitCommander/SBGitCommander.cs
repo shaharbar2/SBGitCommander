@@ -92,7 +92,7 @@ namespace Shahar.Bar.Utils
                 {
                     textColor = Color.green
                 },
-                fontStyle = FontStyle.Bold,
+                fontStyle = FontStyle.Bold
             };
 
             if (GUILayout.Button("Invoke", invokeStyle, GUILayout.Width(100)))
@@ -122,10 +122,6 @@ namespace Shahar.Bar.Utils
             var outputStyle = new GUIStyle(GUI.skin.window)
             {
                 richText = true,
-                normal = { background = Texture2D.blackTexture, textColor = Color.green },
-                hover = { background = Texture2D.blackTexture, textColor = Color.green },
-                focused = { background = Texture2D.blackTexture, textColor = Color.green },
-                active = { background = Texture2D.blackTexture, textColor = Color.green },
                 stretchHeight = true,
                 wordWrap = true,
                 alignment = TextAnchor.UpperLeft
@@ -255,7 +251,24 @@ namespace Shahar.Bar.Utils
             var error = process.StandardError.ReadToEnd();
             process.WaitForExit();
 
-            _commandOutput = $"Output:\n{output}\nError:\n{error}";
+            var commandTitle = "<b>Commands:</b>";
+            var commandFormatted = $"<color=white>{command}</color>";
+
+            var outputTitle = "<b>Output:</b>";
+            var outputFormatted = $"<color=#00FF00>{output}</color>";
+
+            var errorTitle = "<b>Error:</b>";
+            var errorFormatted = $"<color=red>{error}</color>";
+
+            _commandOutput = $@"{commandTitle}
+{commandFormatted} 
+
+{outputTitle}
+{outputFormatted}
+
+{errorTitle}
+{errorFormatted}";
+            
         }
     }
 }
